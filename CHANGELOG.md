@@ -1,3 +1,12 @@
+# [1.13.0](https://github.com/TheNaubit/color-to-hsla/compare/v1.12.1...v1.13.0) (2024-05-20)
+
+
+### Features
+
+* added hslaToString function ([6067c1d](https://github.com/TheNaubit/color-to-hsla/commit/6067c1d093474dd6410100a36b07a7a7de8017a6))
+
+
+
 ## [1.12.1](https://github.com/TheNaubit/color-to-hsla/compare/v1.12.0...v1.12.1) (2024-05-20)
 
 
