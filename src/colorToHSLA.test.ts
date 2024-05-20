@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { colorToHSLA } from "./index";
+import { colorToHSLA, hslaToString } from "./index";
 import type { HSLA } from "./types";
 
 /**
@@ -406,5 +406,62 @@ describe("colorToHSLA", () => {
         a: 1
       })
     );
+  });
+});
+
+describe("hslaToString", () => {
+  it("should return HSLA string", () => {
+    const hsla: HSLA = {
+      h: 120,
+      s: 0.5,
+      l: 0.5,
+      a: 1
+    };
+
+    expect(hslaToString(hsla)).toBe("hsla(120, 50%, 50%, 1)");
+  });
+
+  it("should return HSLA string with alpha 0", () => {
+    const hsla: HSLA = {
+      h: 120,
+      s: 0.5,
+      l: 0.5,
+      a: 0
+    };
+
+    expect(hslaToString(hsla)).toBe("hsla(120, 50%, 50%, 0)");
+  });
+
+  it("should return HSLA string with alpha 0.5", () => {
+    const hsla: HSLA = {
+      h: 120,
+      s: 0.5,
+      l: 0.5,
+      a: 0.5
+    };
+
+    expect(hslaToString(hsla)).toBe("hsla(120, 50%, 50%, 0.5)");
+  });
+
+  it("should return HSLA string with alpha 0.1", () => {
+    const hsla: HSLA = {
+      h: 120,
+      s: 0.5,
+      l: 0.5,
+      a: 0.1
+    };
+
+    expect(hslaToString(hsla)).toBe("hsla(120, 50%, 50%, 0.1)");
+  });
+
+  it("should return HSLA string with alpha 0.1 even if alpha has more decimals", () => {
+    const hsla: HSLA = {
+      h: 120,
+      s: 0.5,
+      l: 0.5,
+      a: 0.1234
+    };
+
+    expect(hslaToString(hsla)).toBe("hsla(120, 50%, 50%, 0.1)");
   });
 });

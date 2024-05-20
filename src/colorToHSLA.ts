@@ -14,10 +14,12 @@ import type { HSLA, IColorObject } from "./types";
 const DEFAULT_HSLA_COLOR = { h: 0, s: 0, l: 0, a: 0 };
 
 /**
- * Parse any valid color string or color object and return HSLA values
- * {Object|String} format
+ * Converts a color value to HSLA format.
+ *
+ * @param format - The color value to convert. It can be either a string or an object.
+ * @returns The color value in HSLA format.
+ * @throws Error if the format is not a string or an object, or if the argument cannot be parsed.
  */
-
 export default function colorToHsla(format: string | IColorObject): HSLA {
   if (typeof format === "string") return parseString(format);
   if (typeof format !== "object") throw new Error("Must pass string or object");
@@ -29,6 +31,14 @@ export default function colorToHsla(format: string | IColorObject): HSLA {
   throw new Error("Could not parse argument");
 }
 
+/**
+ * Checks if the given object has the specified type.
+ *
+ * @param obj - The object to check.
+ * @param type - The type to check for.
+ * @returns A boolean indicating whether the object has the specified type.
+ * @throws {Error} If a key is missing in the color type.
+ */
 function has(obj: IColorObject, type: string) {
   const keys = type.split("");
   let isType: boolean = false;
@@ -43,6 +53,14 @@ function has(obj: IColorObject, type: string) {
   return isType;
 }
 
+/**
+ * Parses a string representation of a color and converts it to HSLA format.
+ * Supports various color formats including HSL, HSLA, HEX, RGB, RGBA, and named colors.
+ * If the string cannot be parsed, it returns the default HSLA color.
+ *
+ * @param string - The string representation of the color.
+ * @returns The parsed color in HSLA format.
+ */
 function parseString(string: string): HSLA {
   try {
     string = `${string}`.trim().toLowerCase();
@@ -171,14 +189,36 @@ function parseString(string: string): HSLA {
   }
 }
 
+/**
+ * Converts a 24-bit RGB color value to an HSLA color object.
+ * @param n - The 24-bit RGB color value.
+ * @returns The corresponding HSLA color object.
+ */
 function rgbn(n: number): HSLA {
   return rgbaToHsla((n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff, 1);
 }
 
+/**
+ * Converts an RGBA color to HSLA format.
+ *
+ * @param r - The red component of the color (0-255).
+ * @param g - The green component of the color (0-255).
+ * @param b - The blue component of the color (0-255).
+ * @param a - The alpha (opacity) value of the color (0-1).
+ * @returns The color converted to HSLA format.
+ */
 function rgba(r: number, g: number, b: number, a: number): HSLA {
   return rgbaToHsla(r, g, b, a);
 }
 
+/**
+ * Converts an RGBA color value to an HSLA color value.
+ * @param R - The red component of the RGBA color value (0-255).
+ * @param G - The green component of the RGBA color value (0-255).
+ * @param B - The blue component of the RGBA color value (0-255).
+ * @param A - The alpha component of the RGBA color value (0-1).
+ * @returns The corresponding HSLA color value.
+ */
 function rgbaToHsla(R: number, G: number, B: number, A: number): HSLA {
   const r = +R / 255;
   const g = +G / 255;
@@ -213,4 +253,18 @@ function rgbaToHsla(R: number, G: number, B: number, A: number): HSLA {
  */
 function hsla(h: number, s: number, l: number, a: number): HSLA {
   return { h: +h, s: +s, l: +l, a: +a };
+}
+
+/**
+ * Converts an HSLA color object to a string representation.
+ * @param hsla - The HSLA color object to convert.
+ * @returns The string representation of the HSLA color.
+ */
+export function hslaToString(hsla: HSLA): string {
+  const _h = Math.round(Math.max(0, Math.min(360, hsla.h))).toFixed(0);
+  const _s = (Math.max(0, Math.min(1, hsla.s)) * 100).toFixed(0);
+  const _l = (Math.max(0, Math.min(1, hsla.l)) * 100).toFixed(0);
+  const _a = parseFloat(hsla.a.toFixed(1));
+
+  return `hsla(${_h}, ${_s}%, ${_l}%, ${_a})`;
 }

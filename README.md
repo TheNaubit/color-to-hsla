@@ -195,6 +195,30 @@ import { colorToHSLA } from "@nauverse/color-to-hsla";
 const myHSLAColor = colorToHSLA("azure"); // { h: 180, s: 1, l: 0.97, a: 1 }
 ~~~
 
+There is another function, `hslaToString`, which allows you to convert any HSLA object to a valid CSS string:
+
+~~~ts
+import { hslaToString } from "@nauverse/color-to-hsla";
+
+const myHSLAString = hslaToString({
+      h: 120,
+      s: 0.5,
+      l: 0.5,
+      a: 0.1
+    }); // "hsla(120, 50%, 50%, 0.1)"
+~~~
+
+~~~ts
+import { hslaToString } from "@nauverse/color-to-hsla";
+
+const myHSLAString = hslaToString({
+      h: 120,
+      s: 0.5,
+      l: 0.5,
+      a: 1
+    }); // "hsla(120, 50%, 50%, 1)"
+~~~
+
 ## Help
 
 Thank you for using *color-to-hsla*!
