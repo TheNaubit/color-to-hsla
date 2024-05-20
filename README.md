@@ -47,7 +47,7 @@ import { colorToHSLA } from "@nauverse/color-to-hsla";
 const myHSLAColor = colorToHSLA("#ff0000"); // { h: 0, s: 1, l: 0.5, a: 1 }
 ~~~
 
-If you want to see more examples, jump to [here](#full-examples).
+If you want to see more examples, jump to [here](#guide-and-examples).
 
 ### 3. You are done! 🪄
 Feel free to test and explore and if later on you need more guidance, read the whole guide and ask in the GitHub repo.
