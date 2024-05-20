@@ -30,7 +30,7 @@
     "color-to-hsla",
     "css-to-hsla"
   ],
-  "version": "1.13.0",
+  "version": "1.13.1",
   "type": "module",
   "main": "./dist/color-to-hsla.umd.cjs",
   "module": "./dist/color-to-hsla.js",

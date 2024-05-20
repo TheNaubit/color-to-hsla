@@ -1,3 +1,12 @@
+## [1.13.1](https://github.com/TheNaubit/color-to-hsla/compare/v1.13.0...v1.13.1) (2024-05-20)
+
+
+### Bug Fixes
+
+* updated examples in the readme ([49d0633](https://github.com/TheNaubit/color-to-hsla/commit/49d0633c3b4e5cbe3f26a821da496ab45d553ea2))
+
+
+
 # [1.13.0](https://github.com/TheNaubit/color-to-hsla/compare/v1.12.1...v1.13.0) (2024-05-20)
 
 
