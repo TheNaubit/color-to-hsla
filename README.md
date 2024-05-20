@@ -4,7 +4,7 @@
 </h1>
 
 <p align="center">
-  <img src="https://github.com/TheNaubit/tailwind-dot-grid-backgrounds/blob/92a8b6c3f527533ded1f497f035c8515c85cb995/images/header.png" alt="color-to-hsla" />
+  <img src="https://github.com/TheNaubit/color-to-hsla/blob/main/images/color-to-hsla.png?raw=true" alt="color-to-hsla" />
 </p>
 
 <h4 align="center">A tiny typesafe library to convert any color in any format to HSLA.</h4>
@@ -71,7 +71,7 @@ It works with hsl, rgb with numbers and percentages, rgba with numbers and perce
       <td>0️⃣ ‎ Zero dependencies</td>
     </tr>
     <tr>
-      <td>👌 <1kB <a href="https://bundlephobia.com/package/@nauverse/color-to-hsla@latest">minified and gzipped</a></td>
+      <td>👌 <3kB <a href="https://bundlephobia.com/package/@nauverse/color-to-hsla@latest">minified and gzipped</a></td>
     </tr>
     <tr>
       <td>🔒 Reliable. Even when you pass really messed up colors (mixed case) or even invalid ones, the library does not crash, it always return something</td>
