@@ -1,7 +1,11 @@
 <h1 align="center">
-  🪄 color-to-hsla
+  🧪 color-to-hsla
   <br>
 </h1>
+
+<p align="center">
+  <img src="https://github.com/TheNaubit/tailwind-dot-grid-backgrounds/blob/92a8b6c3f527533ded1f497f035c8515c85cb995/images/header.png" alt="color-to-hsla" />
+</p>
 
 <h4 align="center">A tiny typesafe library to convert any color in any format to HSLA.</h4>
 
