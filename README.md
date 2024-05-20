@@ -42,9 +42,10 @@ npm install --save @nauverse/color-to-hsla
 
 ### 2. Checking this example of use:
 ~~~ts
-import { colorToHSLA } from "@nauverse/color-to-hsla";
+import { colorToHSLA, hslaToString } from "@nauverse/color-to-hsla";
 
 const myHSLAColor = colorToHSLA("#ff0000"); // { h: 0, s: 1, l: 0.5, a: 1 }
+const myHSLAString = hslaToString(myHSLAColor); // "hsla(0, 100%, 50%, 1)"
 ~~~
 
 If you want to see more examples, jump to [here](#guide-and-examples).
