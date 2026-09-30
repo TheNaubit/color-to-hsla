@@ -1,4 +1,4 @@
-import { clamp, hsla, normalizeHue, rgbaToHsla } from "./lib/convert.js";
+import { clamp, hsla, normalizeHue, rgbaToHsla, round } from "./lib/convert.js";
 import {
 	parseAlpha,
 	parseChannel,
@@ -6,6 +6,7 @@ import {
 	parseHex,
 	parseHslPercentage,
 	parseHue,
+	trimCSS,
 } from "./lib/css.js";
 import colors from "./lib/named.js";
 import type { HSLA, IColorObject } from "./types.js";
@@ -40,13 +41,18 @@ export default function colorToHsla(format: string | IColorObject): HSLA {
 	// Values can come from JavaScript callers: every key is checked at runtime
 	const color: Record<string, unknown> = { ...format };
 	const alpha = format.a == null ? 1 : numberOf(color, "a");
+	// Keys set to undefined (spreads of optional properties) are ignored
+	const isHsl = HSL_KEYS.some((key) => color[key] !== undefined);
+	const isRgb = RGB_KEYS.some((key) => color[key] !== undefined);
 
-	if (HSL_KEYS.some((key) => key in color)) {
+	if (isHsl && isRgb) throw new Error("Can not mix hsl and rgb keys");
+
+	if (isHsl) {
 		const [h, s, l] = HSL_KEYS.map((key) => requiredNumber(color, key, "hsl"));
 		return hsla(h as number, s as number, l as number, alpha);
 	}
 
-	if (RGB_KEYS.some((key) => key in color)) {
+	if (isRgb) {
 		const [r, g, b] = RGB_KEYS.map((key) => requiredNumber(color, key, "rgb"));
 		return rgbaToHsla(r as number, g as number, b as number, alpha);
 	}
@@ -67,7 +73,7 @@ function requiredNumber(
 	key: string,
 	type: string,
 ): number {
-	if (!(key in color) || color[key] === undefined) {
+	if (color[key] === undefined) {
 		throw new Error(`Missing key "${key}" in color type ${type}`);
 	}
 	return numberOf(color, key);
@@ -80,12 +86,13 @@ function requiredNumber(
  * @returns The color in HSLA format, or the default HSLA color if the string can not be parsed.
  */
 function parseString(value: string): HSLA {
-	const color = value.trim().toLowerCase();
+	const color = trimCSS(value).toLowerCase();
 
 	const hex = parseHex(color);
 	if (hex) return rgbaToHsla(...hex);
 
-	const named = colors[color];
+	// Own keys only: "constructor" or "__proto__" are not colors
+	const named = Object.hasOwn(colors, color) ? colors[color] : undefined;
 	if (named !== undefined) {
 		return rgbaToHsla(
 			(named >> 16) & 0xff,
@@ -104,6 +111,14 @@ function parseString(value: string): HSLA {
 	const parsedAlpha = parseAlpha(alpha, modern);
 
 	if (name === "rgb") {
+		// The legacy syntax does not mix numbers and percentages ("rgb(100%, 0, 0)")
+		const percentages = components.filter((component) =>
+			component.endsWith("%"),
+		);
+		if (!modern && percentages.length !== 0 && percentages.length !== 3) {
+			return { ...DEFAULT_HSLA_COLOR };
+		}
+
 		const [r, g, b] = components.map((component) =>
 			parseChannel(component, modern),
 		);
@@ -133,9 +148,10 @@ export function hslaToString(color: HSLA): string {
 	const finite = (value: number): number =>
 		Number.isFinite(value) ? value : 0;
 	const h = normalizeHue(finite(color.h));
-	const s = Math.round(clamp(finite(color.s), 0, 1) * 100);
-	const l = Math.round(clamp(finite(color.l), 0, 1) * 100);
-	const a = Number(clamp(finite(color.a), 0, 1).toFixed(3));
+	// Rounded after removing floating point noise: 0.285 * 100 is 28.499999999999996, but it is 28.5 (29%)
+	const s = Math.round(round(clamp(finite(color.s), 0, 1) * 100));
+	const l = Math.round(round(clamp(finite(color.l), 0, 1) * 100));
+	const a = Math.round(round(clamp(finite(color.a), 0, 1) * 1000)) / 1000;
 
 	return `hsla(${h}, ${s}%, ${l}%, ${a})`;
 }

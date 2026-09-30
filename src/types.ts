@@ -12,6 +12,10 @@ export interface IHSLColorObject {
 	s: number;
 	l: number;
 	a?: number | undefined;
+	// RGB keys can not be mixed with HSL keys
+	r?: undefined;
+	g?: undefined;
+	b?: undefined;
 }
 
 /** An RGB color object: the channels go from 0 to 255, the alpha is optional (1 by default). */
@@ -20,6 +24,10 @@ export interface IRGBColorObject {
 	g: number;
 	b: number;
 	a?: number | undefined;
+	// HSL keys can not be mixed with RGB keys
+	h?: undefined;
+	s?: undefined;
+	l?: undefined;
 }
 
 /** The color objects accepted by colorToHSLA. */

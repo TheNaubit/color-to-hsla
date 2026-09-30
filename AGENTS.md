@@ -33,8 +33,9 @@ src/
 ## Hard rules
 
 1. **Results are always normalized**: `h` is an integer from 0 to 359, `s`, `l` and `a` are clamped between 0 and 1 and rounded to 10 decimals (no floating point noise).
-2. **Strings never throw.** An invalid color string returns `{ h: 0, s: 0, l: 0, a: 0 }`. Invalid objects and non-string, non-object arguments throw.
-3. **Follow CSS Color 4.** The legacy syntax uses commas and no `none`; the modern syntax uses spaces, an optional `/ alpha`, and allows `none` and numbers for the hsl() percentages. Mixed syntaxes are invalid.
+2. **Strings never throw.** An invalid color string returns `{ h: 0, s: 0, l: 0, a: 0 }`. Invalid objects (partial, non-numeric, mixed hsl and rgb keys) and non-string, non-object arguments throw. Keys set to `undefined` are ignored.
+3. **Follow CSS Color 4.** The legacy syntax uses commas, no `none`, and does not mix numbers and percentages in rgb(); the modern syntax uses spaces, an optional `/ alpha`, and allows `none`, mixed channels and numbers for the hsl() percentages. Mixed syntaxes are invalid. Only CSS whitespace (space, tab, line feed, carriage return, form feed) is accepted.
+8. **Parsing stays linear.** Input can be untrusted and long: no regular expression with ambiguous repetition (like `\d+\.?\d*`), and whitespace is trimmed with a loop (`trimCSS`), not a `\s+$` regular expression. `src/hardening.test.ts` checks it.
 4. **The README examples are tests.** A `colorToHSLA(...)` or `hslaToString(...)` call followed by a `// <result>` comment in a `~~~ts` block is run by `src/readme.test.ts`. Keep them true.
 5. **Immutability.** Do not mutate inputs or shared state.
 6. **No emojis** in code, comments or docs. No `console.log`.

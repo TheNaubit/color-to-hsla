@@ -12,9 +12,11 @@ export function clamp(value: number, min: number, max: number): number {
 }
 
 /**
- * Normalizes a hue to an integer between 0 and 359 (hues wrap around: -30 is 330, 480 is 120).
+ * Normalizes a hue to an integer between 0 and 359 (hues wrap around: -30 is 330, 480 is 120, and non-finite hues are 0).
  */
 export function normalizeHue(hue: number): number {
+	// An infinite hue (like "1e999") has no meaningful angle
+	if (!Number.isFinite(hue)) return 0;
 	const rounded = Math.round(((hue % 360) + 360) % 360);
 	return rounded === 360 ? 0 : rounded;
 }

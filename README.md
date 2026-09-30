@@ -218,7 +218,7 @@ colorToHSLA({ r: 255, g: 0, b: 0, a: 0.5 });
 // { h: 0, s: 1, l: 0.5, a: 0.5 }
 ~~~
 
-Objects must be complete: a missing or non-numeric value throws.
+Objects must be complete: a missing or non-numeric value, or a mix of HSL and RGB keys, throws. Keys set to `undefined` are ignored.
 
 ~~~ts
 colorToHSLA({ h: 120 });

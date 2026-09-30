@@ -1,9 +1,30 @@
-// A CSS <number>: "12", "-1.5", ".5", "1e2"
-const NUMBER = "[+-]?(?:\\d+\\.?\\d*|\\.\\d+)(?:e[+-]?\\d+)?";
+// A CSS <number>: "12", "-1.5", ".5", "1e2" (no ambiguous repetition, so a failed match takes linear time)
+const NUMBER = "[+-]?(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:e[+-]?\\d+)?";
+
+// CSS whitespace: space, tab, line feed, carriage return and form feed (not every Unicode space)
+const WHITESPACE = "[ \\t\\n\\r\\f]";
+const WHITESPACE_REGEX = new RegExp(WHITESPACE);
+const WHITESPACE_RUN_REGEX = new RegExp(`${WHITESPACE}+`);
+const WHITESPACE_CHARACTERS = new Set([" ", "\t", "\n", "\r", "\f"]);
+
+/**
+ * Removes the CSS whitespace around a string (a loop instead of a regular expression, which would take quadratic time on long whitespace runs).
+ */
+export function trimCSS(value: string): string {
+	let start = 0;
+	let end = value.length;
+	while (start < end && WHITESPACE_CHARACTERS.has(value[start] as string)) {
+		start += 1;
+	}
+	while (end > start && WHITESPACE_CHARACTERS.has(value[end - 1] as string)) {
+		end -= 1;
+	}
+	return value.slice(start, end);
+}
 const NUMBER_REGEX = new RegExp(`^${NUMBER}$`, "i");
 const PERCENTAGE_REGEX = new RegExp(`^(${NUMBER})%$`, "i");
 const ANGLE_REGEX = new RegExp(`^(${NUMBER})(deg|grad|rad|turn)?$`, "i");
-const FUNCTION_REGEX = /^(rgba?|hsla?)\((.*)\)$/i;
+const FUNCTION_REGEX = /^(rgba?|hsla?)\(([\s\S]*)\)$/i;
 const HEX_REGEX = /^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 
 // Degrees in one unit of each angle unit
@@ -38,16 +59,16 @@ export function parseCSSFunction(value: string): ICSSFunction | null {
 	const name = (match[1] as string).toLowerCase().startsWith("rgb")
 		? "rgb"
 		: "hsl";
-	const inner = (match[2] as string).trim();
+	const inner = trimCSS(match[2] as string);
 
 	if (inner.includes(",")) {
 		// The legacy syntax has no "/" and 3 or 4 comma-separated components
-		const parts = inner.split(",").map((part) => part.trim());
+		const parts = inner.split(",").map(trimCSS);
 		if (
 			inner.includes("/") ||
 			parts.length < 3 ||
 			parts.length > 4 ||
-			parts.some((part) => part === "" || /\s/.test(part))
+			parts.some((part) => part === "" || WHITESPACE_REGEX.test(part))
 		) {
 			return null;
 		}
@@ -60,13 +81,13 @@ export function parseCSSFunction(value: string): ICSSFunction | null {
 	}
 
 	const [main = "", alpha, ...extra] = inner.split("/");
-	const components = main.trim().split(/\s+/);
-	const alphaValue = alpha?.trim();
+	const components = trimCSS(main).split(WHITESPACE_RUN_REGEX);
+	const alphaValue = alpha === undefined ? undefined : trimCSS(alpha);
 	if (
 		extra.length > 0 ||
 		components.length !== 3 ||
 		alphaValue === "" ||
-		/\s/.test(alphaValue ?? "")
+		WHITESPACE_REGEX.test(alphaValue ?? "")
 	) {
 		return null;
 	}
