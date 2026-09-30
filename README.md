@@ -254,6 +254,7 @@ Version 2 fixes many wrong results, so some of them change:
 - Channels, saturation, lightness and alpha are clamped (`rgb(300, 0, 0)` gave a saturation above 1).
 - Values have no floating point noise (`0.49999999999999994` is `0.5`), since they are rounded to 10 decimals.
 - Partial or non-numeric objects throw (the missing values were taken as 0), and `null` throws a clear error. The `IColorObject` type only accepts complete objects, and the types are exported (they were not).
+- Parsing follows CSS Color 4 more strictly: only CSS whitespace is accepted (not other Unicode spaces), the legacy `rgb()` syntax can not mix numbers and percentages, and numbers need digits after a dot (`1.` is invalid). Newlines inside a color and modern values without spaces between tokens (`rgb(10%20%30%)`) are accepted.
 - `hslaToString` wraps the hue (`-30` gave `0`) and keeps up to three alpha decimals (`0.05` gave `0.1`).
 
 ## Help
