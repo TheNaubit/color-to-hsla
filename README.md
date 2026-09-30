@@ -1,18 +1,20 @@
 <h1 align="center">
-  🧪 color-to-hsla
+  color-to-hsla
   <br>
 </h1>
 
 <p align="center">
-  <img src="https://github.com/TheNaubit/color-to-hsla/blob/main/images/color-to-hsla.png?raw=true" alt="color-to-hsla" />
+  <img src="https://raw.githubusercontent.com/TheNaubit/color-to-hsla/main/images/color-to-hsla.png" alt="color-to-hsla" />
 </p>
 
-<h4 align="center">A tiny typesafe library to convert any color in any format to HSLA.</h4>
+<h4 align="center">A tiny, dependency-free TypeScript library to convert any CSS color to HSLA.</h4>
 
 <p align="center">
-  <a href="https://github.com/TheNaubit/color-to-hsla/actions">
-    <img src="https://github.com/TheNaubit/color-to-hsla/actions/workflows/release.yml/badge.svg"
-         alt="Build Status">
+  <a href="https://github.com/TheNaubit/color-to-hsla/actions/workflows/ci.yml">
+    <img src="https://github.com/TheNaubit/color-to-hsla/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI status">
+  </a>
+  <a href="https://github.com/TheNaubit/color-to-hsla/actions/workflows/release.yml">
+    <img src="https://github.com/TheNaubit/color-to-hsla/actions/workflows/release.yml/badge.svg?branch=main" alt="Release status">
   </a>
   <a href="https://www.npmjs.com/package/@nauverse/color-to-hsla">
     <img src="https://img.shields.io/npm/v/@nauverse/color-to-hsla.svg?style=flat" alt="npm version">
@@ -20,256 +22,254 @@
   <a href="https://bundlephobia.com/result?p=@nauverse/color-to-hsla">
     <img src="https://img.shields.io/bundlephobia/minzip/%40nauverse/color-to-hsla" alt="minzipped size">
   </a>
+  <a href="https://github.com/TheNaubit/color-to-hsla/blob/main/LICENSE">
+    <img src="https://img.shields.io/npm/l/@nauverse/color-to-hsla.svg?style=flat" alt="license">
+  </a>
 </p>
 
 <p align="center">
-  <a href="#what">What?</a> •
-  <a href="#why">Why?</a> •
-  <a href="#how">How?</a> •
+  <a href="#tldr">tl;dr</a> •
+  <a href="#why-color-to-hsla">Why color-to-hsla?</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#guide">Guide</a> •
   <a href="#typescript">TypeScript</a> •
-  <a href="#guide-and-examples">Guide and examples</a> •
+  <a href="#upgrading-from-1x">Upgrading from 1.x</a> •
   <a href="#help">Help</a> •
   <a href="#contribute">Contribute</a>
 </p>
 
 ## tl;dr
-If you just want to try and you don't want to read this guide right now (although you should in the future if you decide to use the library), you can start quickly by:
 
-### 1. Installing the dependency:
 ```bash
-npm install --save @nauverse/color-to-hsla
+npm install @nauverse/color-to-hsla
 ```
 
-### 2. Checking this example of use:
 ~~~ts
 import { colorToHSLA, hslaToString } from "@nauverse/color-to-hsla";
 
-const myHSLAColor = colorToHSLA("#ff0000"); // { h: 0, s: 1, l: 0.5, a: 1 }
-const myHSLAString = hslaToString(myHSLAColor); // "hsla(0, 100%, 50%, 1)"
+colorToHSLA("rgb(255 0 0 / 50%)");
+// { h: 0, s: 1, l: 0.5, a: 0.5 }
+
+hslaToString({ h: 120, s: 0.5, l: 0.5, a: 0.25 });
+// "hsla(120, 50%, 50%, 0.25)"
 ~~~
 
-If you want to see more examples, jump to [here](#guide-and-examples).
+## Why color-to-hsla?
 
-### 3. You are done! 🪄
-Feel free to test and explore and if later on you need more guidance, read the whole guide and ask in the GitHub repo.
+Most apps only need one thing from a color library: turning whatever color a user, a design token or a CSS file gives you into numbers you can work with. color-to-hsla does exactly that, for every CSS color syntax, and always returns a normalized result: the hue is an integer from 0 to 359, and the saturation, the lightness and the alpha go from 0 to 1.
 
-## What?
+### color-to-hsla vs other libraries
 
-*color-to-hsla* is heavily inspired in the awesome [color-to-hsla](https://github.com/css-utils/color-to-hsla) and parts of the code where adapted from it. It is a tiny JavaScript library that makes converting from any color format to the HSLA format really easy.
+Every result below was produced by running the libraries (tinycolor2 1.6.0, color 5.0.3, culori 4.0.2, color-to-hsla 2.0.0):
 
-It works with hsl, rgb with numbers and percentages, rgba with numbers and percentages, hex3 colors, hex6 colors and even default CSS colors like `aliceblue`. This tool can be really useful to standarize colors to a single format.
+| Input | tinycolor2 | color | culori | color-to-hsla |
+| ----- | ---------- | ----- | ------ | ------------- |
+| `rgb(255 0 0 / 50%)` | Alpha lost (`a: 1`) | Correct | Correct | `{ h: 0, s: 1, l: 0.5, a: 0.5 }` |
+| `rgba(255, 0, 0, 50%)` | Alpha lost (`a: 1`) | Correct | Correct | `{ h: 0, s: 1, l: 0.5, a: 0.5 }` |
+| `hsl(120deg 50% 50%)` | Invalid | Correct | Correct | `{ h: 120, s: 0.5, l: 0.5, a: 1 }` |
+| `hsl(0.5turn 50% 50%)` | Invalid | Throws | Correct | `{ h: 180, s: 0.5, l: 0.5, a: 1 }` |
+| `hsl(-120, 50%, 50%)` | Wrong hue (`h: 0`) | Correct | Hue not normalized (`h: -120`) | `{ h: 240, s: 0.5, l: 0.5, a: 1 }` |
+| `rgb(300, 0, 0)` | Clamped | Clamped | Not clamped (`s: 1.43`) | Clamped: `{ h: 0, s: 1, l: 0.5, a: 1 }` |
+| Result scale | 0-1 | 0-100 | 0-1, alpha only when set | 0-1, always with alpha |
+| Invalid string | Flag to check | Throws | `undefined` | `{ h: 0, s: 0, l: 0, a: 0 }` |
+| Size (minified + gzipped, only what the example needs) | 5.3 kB | 8.5 kB | 5.0 kB | 2.9 kB, zero dependencies |
+
+Choose culori or color if you need other color spaces (Lab, OKLCH, P3...), color manipulation or conversions to other formats. Choose color-to-hsla if you need HSLA, fast, with no dependencies and no surprises.
 
 ### Features
 
-  <table>
-  <thead>
-    <tr>
-      <th><strong>v1</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>0️⃣ ‎ Zero dependencies</td>
-    </tr>
-    <tr>
-      <td>👌 <3kB <a href="https://bundlephobia.com/package/@nauverse/color-to-hsla@latest">minified and gzipped</a></td>
-    </tr>
-    <tr>
-      <td>🔒 Reliable. Even when you pass really messed up colors (mixed case) or even invalid ones, the library does not crash, it always return something</td>
-    </tr>
-    <tr>
-      <td>✍️ Support for hsl, hsla, rgb (with numbers and percentages), rgba (with numbers and percentages), hex3, hex6 and even CSS default colors</td>
-    </tr>
-    <tr>
-      <td>🛟 Full of tests</td>
-    </tr>
-    <tr>
-      <td>✅ Production ready</td>
-    </tr>
-  </tbody>
-  </table>
+- Every CSS syntax of hex colors (`#f00`, `#f008`, `#ff0000`, `#ff000080`), `rgb()`, `rgba()`, `hsl()` and `hsla()`
+- Legacy (`rgb(255, 0, 0)`) and modern (`rgb(255 0 0 / 50%)`) syntaxes, percentages, `none`, and hue units (`deg`, `grad`, `rad`, `turn`)
+- All 148 CSS named colors and `transparent`
+- Objects: `{ h, s, l, a }` and `{ r, g, b, a }`
+- Normalized results: wrapped hue, clamped values, no floating point noise
+- Never throws on strings: invalid colors return a transparent black
+- `hslaToString` to go back to CSS
+- Zero dependencies, ESM and CommonJS builds, TypeScript types included
 
-## Why?
-
-Sometimes you need to handle colors and you need to suport several formats but you do not want to be detecting/guessing all the time how to work with those colors.
-
-An usual good way to handle that is to convert every color to a single format. This tool helps you with that, so you do not have to handle that tricky logic every time you need that functionality.
-
-## How?
-
-### Install
-
-Currently, the package is distributed via NPM.
+## Installation
 
 ```bash
-npm install --save @nauverse/color-to-hsla
+npm install @nauverse/color-to-hsla
 ```
 
-### Usage with Node
+~~~ts
+// ESM
+import { colorToHSLA, hslaToString } from "@nauverse/color-to-hsla";
+// CommonJS
+const { colorToHSLA, hslaToString } = require("@nauverse/color-to-hsla");
+~~~
 
-Node 18 and above are officially supported, though you may have luck using it with an earlier Node version.
+It runs in every modern browser and in Node.js 22 and later.
 
-The package comes with CJS and ESM modules.
+## Guide
+
+### colorToHSLA
+
+`colorToHSLA` takes a CSS color string or a color object and returns `{ h, s, l, a }`:
+
+- `h`: the hue, an integer from 0 to 359
+- `s`: the saturation, from 0 to 1
+- `l`: the lightness, from 0 to 1
+- `a`: the alpha, from 0 to 1
+
+#### Hex colors
+
+~~~ts
+colorToHSLA("#f00");
+// { h: 0, s: 1, l: 0.5, a: 1 }
+~~~
+
+~~~ts
+colorToHSLA("#FF0000");
+// { h: 0, s: 1, l: 0.5, a: 1 }
+~~~
+
+~~~ts
+colorToHSLA("#ff000080");
+// { h: 0, s: 1, l: 0.5, a: 0.5019607843 }
+~~~
+
+#### rgb() and rgba()
+
+~~~ts
+colorToHSLA("rgb(255, 0, 0)");
+// { h: 0, s: 1, l: 0.5, a: 1 }
+~~~
+
+~~~ts
+colorToHSLA("rgb(100%, 0%, 0%)");
+// { h: 0, s: 1, l: 0.5, a: 1 }
+~~~
+
+~~~ts
+colorToHSLA("rgba(255, 0, 0, 0.5)");
+// { h: 0, s: 1, l: 0.5, a: 0.5 }
+~~~
+
+~~~ts
+colorToHSLA("rgb(255 0 0 / 50%)");
+// { h: 0, s: 1, l: 0.5, a: 0.5 }
+~~~
+
+#### hsl() and hsla()
+
+~~~ts
+colorToHSLA("hsl(120, 50%, 50%)");
+// { h: 120, s: 0.5, l: 0.5, a: 1 }
+~~~
+
+~~~ts
+colorToHSLA("hsla(120, 50%, 50%, 0.3)");
+// { h: 120, s: 0.5, l: 0.5, a: 0.3 }
+~~~
+
+~~~ts
+colorToHSLA("hsl(0.5turn 50% 50% / 25%)");
+// { h: 180, s: 0.5, l: 0.5, a: 0.25 }
+~~~
+
+#### Named colors and transparent
+
+~~~ts
+colorToHSLA("rebeccapurple");
+// { h: 270, s: 0.5, l: 0.4, a: 1 }
+~~~
+
+~~~ts
+colorToHSLA("transparent");
+// { h: 0, s: 0, l: 0, a: 0 }
+~~~
+
+#### Normalization
+
+Hues wrap around, and every other value is clamped, like CSS does:
+
+~~~ts
+colorToHSLA("hsl(-120, 150%, 50%)");
+// { h: 240, s: 1, l: 0.5, a: 1 }
+~~~
+
+~~~ts
+colorToHSLA("rgba(300, 0, 0, 2)");
+// { h: 0, s: 1, l: 0.5, a: 1 }
+~~~
+
+#### Invalid colors
+
+Strings never throw: an invalid color returns a transparent black.
+
+~~~ts
+colorToHSLA("not a color");
+// { h: 0, s: 0, l: 0, a: 0 }
+~~~
+
+#### Objects
+
+HSL objects use a saturation and a lightness from 0 to 1, RGB objects use channels from 0 to 255. The alpha is optional (1 by default):
+
+~~~ts
+colorToHSLA({ h: 120, s: 0.5, l: 0.5 });
+// { h: 120, s: 0.5, l: 0.5, a: 1 }
+~~~
+
+~~~ts
+colorToHSLA({ r: 255, g: 0, b: 0, a: 0.5 });
+// { h: 0, s: 1, l: 0.5, a: 0.5 }
+~~~
+
+Objects must be complete: a missing or non-numeric value throws.
+
+~~~ts
+colorToHSLA({ h: 120 });
+// Throws: Missing key "s" in color type hsl
+~~~
+
+### hslaToString
+
+`hslaToString` converts an HSLA object to a CSS string. The hue wraps around, the saturation and the lightness are rounded percentages, and the alpha keeps up to three decimals:
+
+~~~ts
+hslaToString({ h: 120, s: 0.5, l: 0.5, a: 1 });
+// "hsla(120, 50%, 50%, 1)"
+~~~
+
+~~~ts
+hslaToString({ h: -30, s: 0.5, l: 0.5, a: 0.125 });
+// "hsla(330, 50%, 50%, 0.125)"
+~~~
 
 ## TypeScript
 
-This library provides its own type definitions. "It just works", no need to install anything from `@types`.
+The package includes its type definitions: `HSLA` (the result) and `IColorObject` (the accepted objects).
 
-## Guide and examples
-> A good contribution for this repo would be a more detailed guide about how to use it.
+## Upgrading from 1.x
 
-The most important function that this package offers is `colorToHsla`. Let's see some examples:
-### HEX3 color to HSLA object
-~~~ts
-import { colorToHSLA } from "@nauverse/color-to-hsla";
+Version 2 fixes many wrong results, so some of them change:
 
-const myHSLAColor = colorToHSLA("#f00"); // { h: 0, s: 1, l: 0.5, a: 1 }
-~~~
-
-### HEX6 color to HSLA object
-~~~ts
-import { colorToHSLA } from "@nauverse/color-to-hsla";
-
-const myHSLAColor = colorToHSLA("#ff0000"); // { h: 0, s: 1, l: 0.5, a: 1 }
-~~~
-
-### RGB color with numbers to HSLA object
-~~~ts
-import { colorToHSLA } from "@nauverse/color-to-hsla";
-
-const myHSLAColor = colorToHSLA("rgb(255, 0, 0)"); // { h: 0, s: 1, l: 0.5, a: 1 }
-~~~
-
-### RGB color with percentages to HSLA object
-~~~ts
-import { colorToHSLA } from "@nauverse/color-to-hsla";
-
-const myHSLAColor = colorToHSLA("rgb(100%, 0%, 0%)"); // { h: 0, s: 1, l: 0.5, a: 1 }
-~~~
-
-### RGBA color with numbers to HSLA object
-~~~ts
-import { colorToHSLA } from "@nauverse/color-to-hsla";
-
-const myHSLAColor = colorToHSLA("rgba(255, 0, 0, 1)"); // { h: 0, s: 1, l: 0.5, a: 1 }
-~~~
-
-### RGBA color with percentages to HSLA object
-~~~ts
-import { colorToHSLA } from "@nauverse/color-to-hsla";
-
-const myHSLAColor = colorToHSLA("rgba(100%, 0%, 0%, 1)"); // { h: 0, s: 1, l: 0.5, a: 1 }
-~~~
-
-### HSL color to HSLA object
-~~~ts
-import { colorToHSLA } from "@nauverse/color-to-hsla";
-
-const myHSLAColor = colorToHSLA("hsl(120, 50%, 50%)"); // { h: 120, s: 0.5, l: 0.5, a: 1 }
-~~~
-
-### HSLA color to HSLA object
-~~~ts
-import { colorToHSLA } from "@nauverse/color-to-hsla";
-
-const myHSLAColor = colorToHSLA("hsla(120, 50%, 50%, 1)"); // { h: 120, s: 0.5, l: 0.5, a: 1 }
-~~~
-
-### Transparent color to HSLA object
-~~~ts
-import { colorToHSLA } from "@nauverse/color-to-hsla";
-
-const myHSLAColor = colorToHSLA("transparent"); // { h: 0, s: 0, l: 0, a: 0 }
-~~~
-
-### Invalid color to HSLA object
-~~~ts
-import { colorToHSLA } from "@nauverse/color-to-hsla";
-
-const myHSLAColor = colorToHSLA("hihhoihoho"); // { h: 0, s: 0, l: 0, a: 0 }
-~~~
-
-### CSS default color to HSLA object
-~~~ts
-import { colorToHSLA } from "@nauverse/color-to-hsla";
-
-const myHSLAColor = colorToHSLA("azure"); // { h: 180, s: 1, l: 0.97, a: 1 }
-~~~
-
-There is another function, `hslaToString`, which allows you to convert any HSLA object to a valid CSS string:
-
-~~~ts
-import { hslaToString } from "@nauverse/color-to-hsla";
-
-const myHSLAString = hslaToString({
-      h: 120,
-      s: 0.5,
-      l: 0.5,
-      a: 0.1
-    }); // "hsla(120, 50%, 50%, 0.1)"
-~~~
-
-~~~ts
-import { hslaToString } from "@nauverse/color-to-hsla";
-
-const myHSLAString = hslaToString({
-      h: 120,
-      s: 0.5,
-      l: 0.5,
-      a: 1
-    }); // "hsla(120, 50%, 50%, 1)"
-~~~
+- Node.js 22 or later is required.
+- `black` returned `a: 0` (it was taken as an unknown color). It now returns `a: 1`.
+- The modern CSS syntax, percentage alphas, hue units and `#rgba` / `#rrggbbaa` hex colors are supported (they returned `{ h: 0, s: 0, l: 0, a: 0 }`).
+- Hues wrap around (from 0 to 359) and decimal hues are rounded instead of truncated.
+- Channels, saturation, lightness and alpha are clamped (`rgb(300, 0, 0)` gave a saturation above 1).
+- Values have no floating point noise (`0.49999999999999994` is `0.5`), since they are rounded to 10 decimals.
+- Partial or non-numeric objects throw (the missing values were taken as 0), and `null` throws a clear error.
+- `hslaToString` wraps the hue (`-30` gave `0`) and keeps up to three alpha decimals (`0.05` gave `0.1`).
 
 ## Help
 
 Thank you for using *color-to-hsla*!
 
-If you need any help using this library, feel free to [create a GitHub issue](https://github.com/TheNaubit/color-to-hsla/issues/new/choose), and ask your questions. I'll try to answer as quickly as possible.
+If you need any help using this library, feel free to [create a GitHub issue](https://github.com/TheNaubit/color-to-hsla/issues/new/choose) and ask your questions. I'll try to answer as quickly as possible.
 
 ## Contribute
 
-Contributions of any kind (pull requests, bug reports, feature requests, documentation, design) are more than welcome! If you like this project and want to help, but feel like you are stuck, feel free to contact the maintainers.
+Contributions of any kind (pull requests, bug reports, feature requests, documentation, design) are more than welcome! Read the [contributing guide](./CONTRIBUTING.md) to get started (and [AGENTS.md](./AGENTS.md) if you use a coding agent).
 
-### Building from source
-
-Building the project should be quick and easy. If it isn't, it's the maintainer's fault. Please report any problems with building in a GitHub issue.
-
-You need to have a reasonably recent version of node.js to build *color-to-hsla*. 
-Tested on node version 18.0.0 and npm version 8.6.0.
-
-First, clone the git repository:
-
-```
-git clone git@github.com:TheNaubit/color-to-hsla.git
-```
-
-Then switch to the newly created color-to-hsla directory and install the dependencies:
-
-```
-cd color-to-hsla
-npm install
-```
-
-You can then run the unit tests to verify that everything works correctly:
-
-```
-npm run test:run
-```
-
-And finally, build the library:
-
-```
-npm run build
-```
-
-The output will appear in the `dist` directory.
-
-Happy hacking!
-
-## Contributors ✨
+## Contributors
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
