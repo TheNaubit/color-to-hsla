@@ -37,23 +37,24 @@ export default function colorToHsla(format: string | IColorObject): HSLA {
 		throw new Error("Must pass string or object");
 	}
 
-	const alpha =
-		format.a === undefined || format.a === null ? 1 : numberOf(format, "a");
+	// Values can come from JavaScript callers: every key is checked at runtime
+	const color: Record<string, unknown> = { ...format };
+	const alpha = format.a == null ? 1 : numberOf(color, "a");
 
-	if (HSL_KEYS.some((key) => key in format)) {
-		const [h, s, l] = HSL_KEYS.map((key) => requiredNumber(format, key, "hsl"));
+	if (HSL_KEYS.some((key) => key in color)) {
+		const [h, s, l] = HSL_KEYS.map((key) => requiredNumber(color, key, "hsl"));
 		return hsla(h as number, s as number, l as number, alpha);
 	}
 
-	if (RGB_KEYS.some((key) => key in format)) {
-		const [r, g, b] = RGB_KEYS.map((key) => requiredNumber(format, key, "rgb"));
+	if (RGB_KEYS.some((key) => key in color)) {
+		const [r, g, b] = RGB_KEYS.map((key) => requiredNumber(color, key, "rgb"));
 		return rgbaToHsla(r as number, g as number, b as number, alpha);
 	}
 
 	throw new Error("Could not parse argument");
 }
 
-function numberOf(color: IColorObject, key: keyof IColorObject): number {
+function numberOf(color: Record<string, unknown>, key: string): number {
 	const value = color[key];
 	if (typeof value !== "number" || !Number.isFinite(value)) {
 		throw new Error(`Invalid value for key "${key}"`);
@@ -62,8 +63,8 @@ function numberOf(color: IColorObject, key: keyof IColorObject): number {
 }
 
 function requiredNumber(
-	color: IColorObject,
-	key: keyof IColorObject,
+	color: Record<string, unknown>,
+	key: string,
 	type: string,
 ): number {
 	if (!(key in color) || color[key] === undefined) {

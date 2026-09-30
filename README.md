@@ -241,7 +241,7 @@ hslaToString({ h: -30, s: 0.5, l: 0.5, a: 0.125 });
 
 ## TypeScript
 
-The package includes its type definitions: `HSLA` (the result) and `IColorObject` (the accepted objects).
+The package includes its type definitions: `HSLA` (the result) and `IColorObject` (the accepted objects: `IHSLColorObject | IRGBColorObject`). Partial objects are type errors.
 
 ## Upgrading from 1.x
 
@@ -253,7 +253,7 @@ Version 2 fixes many wrong results, so some of them change:
 - Hues wrap around (from 0 to 359) and decimal hues are rounded instead of truncated.
 - Channels, saturation, lightness and alpha are clamped (`rgb(300, 0, 0)` gave a saturation above 1).
 - Values have no floating point noise (`0.49999999999999994` is `0.5`), since they are rounded to 10 decimals.
-- Partial or non-numeric objects throw (the missing values were taken as 0), and `null` throws a clear error.
+- Partial or non-numeric objects throw (the missing values were taken as 0), and `null` throws a clear error. The `IColorObject` type only accepts complete objects, and the types are exported (they were not).
 - `hslaToString` wraps the hue (`-30` gave `0`) and keeps up to three alpha decimals (`0.05` gave `0.1`).
 
 ## Help

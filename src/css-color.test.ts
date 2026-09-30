@@ -158,9 +158,11 @@ describe("objects", () => {
 	});
 
 	it("throws on partial objects", () => {
+		// @ts-expect-error: partial object on purpose
 		expect(() => colorToHSLA({ h: 120 })).toThrow(
 			'Missing key "s" in color type hsl',
 		);
+		// @ts-expect-error: partial object on purpose
 		expect(() => colorToHSLA({ r: 255 })).toThrow(
 			'Missing key "g" in color type rgb',
 		);
@@ -181,6 +183,7 @@ describe("objects", () => {
 		expect(() => colorToHSLA(null)).toThrow("Must pass string or object");
 		// @ts-expect-error: invalid argument on purpose (plain JavaScript callers)
 		expect(() => colorToHSLA(42)).toThrow("Must pass string or object");
+		// @ts-expect-error: partial object on purpose
 		expect(() => colorToHSLA({})).toThrow("Could not parse argument");
 	});
 });
