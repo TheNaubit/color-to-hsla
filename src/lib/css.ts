@@ -4,7 +4,33 @@ const NUMBER = "[+-]?(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:e[+-]?\\d+)?";
 // CSS whitespace: space, tab, line feed, carriage return and form feed (not every Unicode space)
 const WHITESPACE = "[ \\t\\n\\r\\f]";
 const WHITESPACE_REGEX = new RegExp(WHITESPACE);
-const WHITESPACE_RUN_REGEX = new RegExp(`${WHITESPACE}+`);
+// An identifier (a unit), read greedily like the CSS tokenizer: "1deg5" is the unit "deg5", not "1deg" and "5"
+// It starts with a letter, "_", "-" and a letter or "_", or "--" ("-18" is a number, not a unit)
+const IDENTIFIER = "(?:-?[a-z_]|--)[a-z0-9_-]*";
+
+// A token of the modern syntax: a number with an optional unit or "%", "none" or "/", with the whitespace around it
+const TOKEN_REGEX = new RegExp(
+	`${WHITESPACE}*(${NUMBER}(?:%|${IDENTIFIER})?|none(?![a-z0-9_-])|/)${WHITESPACE}*`,
+	"iy",
+);
+
+/**
+ * Splits the inside of a modern color function into tokens, or returns null if something is not a token.
+ */
+function tokenize(text: string): Array<string> | null {
+	const tokens: Array<string> = [];
+	let index = 0;
+
+	while (index < text.length) {
+		TOKEN_REGEX.lastIndex = index;
+		const match = TOKEN_REGEX.exec(text);
+		if (!match) return null;
+		tokens.push(match[1] as string);
+		index = TOKEN_REGEX.lastIndex;
+	}
+
+	return tokens;
+}
 const WHITESPACE_CHARACTERS = new Set([" ", "\t", "\n", "\r", "\f"]);
 
 /**
@@ -80,17 +106,22 @@ export function parseCSSFunction(value: string): ICSSFunction | null {
 		};
 	}
 
-	const [main = "", alpha, ...extra] = inner.split("/");
-	const components = trimCSS(main).split(WHITESPACE_RUN_REGEX);
-	const alphaValue = alpha === undefined ? undefined : trimCSS(alpha);
+	// The modern syntax is tokenized: whitespace is optional between tokens the CSS tokenizer separates anyway ("rgb(10%20%30%)")
+	const tokens = tokenize(inner);
+	if (tokens === null) return null;
+
+	const slashIndex = tokens.indexOf("/");
+	const components = slashIndex === -1 ? tokens : tokens.slice(0, slashIndex);
+	const alphaTokens = slashIndex === -1 ? [] : tokens.slice(slashIndex + 1);
 	if (
-		extra.length > 0 ||
 		components.length !== 3 ||
-		alphaValue === "" ||
-		WHITESPACE_REGEX.test(alphaValue ?? "")
+		components.includes("/") ||
+		(slashIndex !== -1 && alphaTokens.length !== 1) ||
+		alphaTokens.includes("/")
 	) {
 		return null;
 	}
+	const alphaValue = alphaTokens[0];
 
 	return {
 		name,

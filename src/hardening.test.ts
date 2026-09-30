@@ -80,3 +80,49 @@ describe("hslaToString rounding", () => {
 		);
 	});
 });
+
+describe("round two", () => {
+	it("lowercases ASCII letters only", () => {
+		expect(colorToHSLA("blacK")).toEqual(INVALID);
+		expect(colorToHSLA("BLACK")).toEqual({ h: 0, s: 0, l: 0, a: 1 });
+	});
+
+	it("reads the alpha from the own keys, like the other values", () => {
+		const inherited = Object.assign(Object.create({ a: 0.5 }), {
+			h: 0,
+			s: 1,
+			l: 0.5,
+		});
+		expect(colorToHSLA(inherited)).toEqual(RED);
+	});
+
+	it("does not require whitespace between separate tokens", () => {
+		expect(colorToHSLA("rgb(100%0%0%)")).toEqual(RED);
+		expect(colorToHSLA("rgb(255 0.0.0)")).toEqual(RED);
+		expect(colorToHSLA("hsl(0 100%+50%)")).toEqual(RED);
+		expect(colorToHSLA("rgb(255 0 0/.5)")).toEqual({ ...RED, a: 0.5 });
+		expect(colorToHSLA("rgb(255 0 0 0)")).toEqual(INVALID);
+		expect(colorToHSLA("rgb(255 0 0 / )")).toEqual(INVALID);
+	});
+
+	it("reads identifiers and units greedily, like the CSS tokenizer", () => {
+		expect(colorToHSLA("rgb(none noneNONE)")).toEqual(INVALID);
+		expect(colorToHSLA("rgb(NONE56.65% 0 0)")).toEqual(INVALID);
+		expect(colorToHSLA("hsl(1deg5 50% 50%)")).toEqual(INVALID);
+		expect(colorToHSLA("rgb(255-0 0)")).toEqual({ ...RED });
+		expect(colorToHSLA("rgb(none none none)")).toEqual({
+			h: 0,
+			s: 0,
+			l: 0,
+			a: 1,
+		});
+	});
+
+	it("stays linear with the tokenizer", () => {
+		const start = performance.now();
+		colorToHSLA(`rgb(${"1 ".repeat(100_000)})`);
+		colorToHSLA(`rgb(${"/".repeat(100_000)})`);
+		colorToHSLA(`rgb(${"1.".repeat(100_000)})`);
+		expect(performance.now() - start).toBeLessThan(500);
+	});
+});

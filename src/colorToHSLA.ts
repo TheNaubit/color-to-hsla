@@ -40,7 +40,9 @@ export default function colorToHsla(format: string | IColorObject): HSLA {
 
 	// Values can come from JavaScript callers: every key is checked at runtime
 	const color: Record<string, unknown> = { ...format };
-	const alpha = format.a == null ? 1 : numberOf(color, "a");
+	// Like the other values, the alpha is read from the own keys of the object
+	const { a } = color;
+	const alpha = a === undefined || a === null ? 1 : numberOf(color, "a");
 	// Keys set to undefined (spreads of optional properties) are ignored
 	const isHsl = HSL_KEYS.some((key) => color[key] !== undefined);
 	const isRgb = RGB_KEYS.some((key) => color[key] !== undefined);
@@ -86,7 +88,10 @@ function requiredNumber(
  * @returns The color in HSLA format, or the default HSLA color if the string can not be parsed.
  */
 function parseString(value: string): HSLA {
-	const color = trimCSS(value).toLowerCase();
+	// CSS keywords are ASCII case-insensitive: the Kelvin sign "\u212A" is not a "k"
+	const color = trimCSS(value).replace(/[A-Z]/g, (letter) =>
+		letter.toLowerCase(),
+	);
 
 	const hex = parseHex(color);
 	if (hex) return rgbaToHsla(...hex);
