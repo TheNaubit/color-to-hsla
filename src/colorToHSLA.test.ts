@@ -281,12 +281,13 @@ describe("colorToHSLA", () => {
 	it("should detect named color black and return HSLA", () => {
 		const black = "black";
 
+		// Black is 0x000000: it used to be taken as an unknown color (a: 0)
 		expect(fixedDecimalsHSLA(colorToHSLA(black))).toEqual(
 			fixedDecimalsHSLA({
 				h: 0,
 				s: 0,
 				l: 0,
-				a: 0,
+				a: 1,
 			}),
 		);
 	});
@@ -454,7 +455,7 @@ describe("hslaToString", () => {
 		expect(hslaToString(hsla)).toBe("hsla(120, 50%, 50%, 0.1)");
 	});
 
-	it("should return HSLA string with alpha 0.1 even if alpha has more decimals", () => {
+	it("should return HSLA string with up to three alpha decimals", () => {
 		const hsla: HSLA = {
 			h: 120,
 			s: 0.5,
@@ -462,6 +463,6 @@ describe("hslaToString", () => {
 			a: 0.1234,
 		};
 
-		expect(hslaToString(hsla)).toBe("hsla(120, 50%, 50%, 0.1)");
+		expect(hslaToString(hsla)).toBe("hsla(120, 50%, 50%, 0.123)");
 	});
 });
