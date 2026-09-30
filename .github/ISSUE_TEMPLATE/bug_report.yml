@@ -1,0 +1,32 @@
+name: Bug report
+description: A color is not converted as documented
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: "2.0.0"
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: The call
+      description: The exact colorToHSLA or hslaToString call.
+      render: ts
+    validations:
+      required: true
+  - type: input
+    id: actual
+    attributes:
+      label: Actual result
+    validations:
+      required: true
+  - type: input
+    id: expected
+    attributes:
+      label: Expected result
+      description: If possible, what a browser gives for the same CSS color.
+    validations:
+      required: true
