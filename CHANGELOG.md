@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/TheNaubit/color-to-hsla/compare/v2.0.0...v2.0.1) (2026-11-08)
+
+
+### Bug Fixes
+
+* update dependencies to patch known vulnerabilities ([555633c](https://github.com/TheNaubit/color-to-hsla/commit/555633c0f10368274a27b59d3ee89a494d5eddba))
+
 # [2.0.0](https://github.com/TheNaubit/color-to-hsla/compare/v1.13.1...v2.0.0) (2026-09-30)
 
 
